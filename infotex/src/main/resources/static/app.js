@@ -21,13 +21,15 @@ function disconnect() {
     setConnected(false);
     console.log("Disconnected");
 }
-
+function stompSend(json) {
+	stompClient.send("/factorize/do", {}, JSON.stringify(json));
+}
 function sendValue() {
-    stompClient.send("/factorize/do", {}, JSON.stringify({'action': "add", 'value': $("#value").val()}));
+    stompSend({'action': "add", 'value': $("#value").val()});
     document.getElementById("input-form").reset();
 }
 function removeValue(value) {
-    stompClient.send("/factorize/do", {}, JSON.stringify({'action': "remove", 'value': value}));
+    stompSend({'action': "remove", 'value': value});
 	
 }
 
@@ -86,7 +88,7 @@ function createRow(taskId) {
     tr.id = getTaskId(taskId); 
     var td = tr.insertCell(); // button
     td.onclick = function() { t.removeChild(tr); removeValue(taskId); }
-    td.innerHTML = "<button class='editbtn'>remove</button>";
+    td.innerHTML = "<button class='rmvbtn'>remove</button>";
     td = tr.insertCell();
     td.innerHTML = taskId; // value
     td = tr.insertCell(); // result
