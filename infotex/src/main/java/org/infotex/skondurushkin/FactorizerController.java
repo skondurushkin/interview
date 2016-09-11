@@ -63,10 +63,13 @@ public class FactorizerController {
     @MessageMapping("/do")
     @SendTo("/test/notifications")
     public Notification factorize(Command command) throws Exception {
-        return processCommand(command);
+        Notification ntf =  processCommand(command);
+		log.info("Notify client: " + ntf.getTaskId() + " " + ntf.getClass().getName());
+        return ntf;
     }
     
     public void sendNotification(Notification ntf) throws Exception {
+		log.info("Notify client: " + ntf.getTaskId() + " " + ntf.getClass().getName());
         template.convertAndSend("/test/notifications", ntf);
     }
     
@@ -82,14 +85,22 @@ public class FactorizerController {
     	}
     	return ret;
     }
-    
+    Notification getJobNotification(FactorizerJob job) {
+		return job.isDone() ? Notification.done(job.getId(), job.getResult()) 
+				: Notification.running(job.getId());
+    }
+    protected void updateJobState(FactorizerJob job){
+    	try {
+			sendNotification(getJobNotification(job));
+		} catch (Exception e) {
+			Helpers.rethrowAsRunimeException(e);
+		}
+    }
     protected Notification addTask(long value) {
     	// 1. Try to reuse current completed or still running jobs
     	FactorizerJob job = FactorizerJob.lookup(value);
 		if (job != null) {
-			
-			return job.isDone() ? Notification.done(value, job.getResult()) 
-								: Notification.running(value);
+			return getJobNotification(job);
 		}
 		// Check for recently done jobs
 		CompletableFuture<FactorizerJob> future = null;
@@ -104,7 +115,7 @@ public class FactorizerController {
 		}
 		// Finally supply asynchronous task with completable future
 		futures.computeIfAbsent(value, (k) ->  CompletableFuture.supplyAsync(() -> FactorizerJob.create(value).go(), executor))
-		       .thenApply(x -> futures.remove(x.getId()));
+		       .thenApply(x -> { futures.remove(x.getId()); updateJobState(x); return x; });
 		
     	return Notification.added(value);
     }

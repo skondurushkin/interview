@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hello WebSocket</title>
+    <title>Online Factorizer</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/main.css" rel="stylesheet">
     <script src="/webjars/jquery/jquery.min.js"></script>
@@ -16,7 +16,7 @@
 <div id="main-content" class="container">
     <div class="row">
         <div class="col-md-6">
-            <form class="form-inline">
+            <form id="input-form" class="form-inline">
                 <div class="form-group">
                     <label for="name">Enter integer value</label>
                     <input type="number" id="value" class="form-control" placeholder="integer number here...">
@@ -30,7 +30,9 @@
             <table id="conversation" class="table table-striped">
                 <thead>
                 <tr>
-                    <th>Results</th>
+                	<th></th>
+                    <th>Value</th>
+                    <th>Result</th>
                 </tr>
                 </thead>
                 <tbody id="results">

@@ -48,7 +48,7 @@ public class FactorizerJob implements Callable<List<Factor>> {
 		if (value > 1) {
 			fzr.forEach(ret::add);
 		}
-		return ret;
+		return fzr.isCancelled()? null : ret;
 	}
 	
 	public FactorizerJob go() {
